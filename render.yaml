@@ -1,0 +1,58 @@
+services:
+  - type: web
+    name: lama-topup-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    # One worker: SQLite + in-memory rate limits. Threads handle concurrency.
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 90
+    healthCheckPath: /api/health
+    # IMPORTANT: orders live in SQLite. On Render, the disk is wiped on every
+    # deploy/restart unless you attach a persistent disk (paid plans only).
+    # Uncomment the disk below and set DATABASE_PATH to match.
+    # disk:
+    #   name: lama-data
+    #   mountPath: /var/data
+    #   sizeGB: 1
+    envVars:
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: DATABASE_PATH
+        value: data/lama.sqlite3   # use /var/data/lama.sqlite3 with a disk
+      - key: GOXTOP_API_KEY
+        sync: false
+      - key: GOXTOP_BASE_URL
+        value: https://goxtop.com/api/v.1
+      - key: GOXTOP_FREEFIRE_GAME_CODE
+        value: freefire_global
+      - key: GOXTOP_CREATE_PATH
+        value: /create
+      - key: GOXTOP_TIMEOUT
+        value: "20"
+      - key: DRY_RUN
+        value: "true"
+      - key: TZ_OFFSET_MINUTES
+        value: "345"
+      - key: FF_25_CODE
+        sync: false
+      - key: FF_50_CODE
+        sync: false
+      - key: FF_115_CODE
+        sync: false
+      - key: FF_240_CODE
+        sync: false
+      - key: FF_610_CODE
+        sync: false
+      - key: FF_1240_CODE
+        sync: false
+      - key: FF_2530_CODE
+        sync: false
+      - key: FF_WEEKLY_CODE
+        sync: false
+      - key: FF_MONTHLY_CODE
+        sync: false
+      - key: PLAYER_LOOKUP_URL
+        sync: false
+      - key: PLAYER_LOOKUP_REGION
+        value: BD
+      - key: PLAYER_LOOKUP_API_KEY
+        sync: false
