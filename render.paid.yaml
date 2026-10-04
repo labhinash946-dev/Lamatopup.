@@ -1,0 +1,36 @@
+# Paid setup (Starter web service + 1 GB disk). Use this file instead of render.yaml to keep orders permanently.
+services:
+  - type: web
+    name: lama-topup-backend
+    env: python
+    plan: starter   # Free web services cannot attach a disk, so orders would be wiped on every restart
+    buildCommand: pip install -r requirements.txt
+    # One worker: SQLite + in-memory rate limits. Threads handle concurrency.
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 90
+    healthCheckPath: /api/health
+    # Orders live in SQLite on this persistent disk, so they survive restarts and redeploys.
+    disk:
+      name: lama-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: DATABASE_PATH
+        value: /var/data/lama.sqlite3   # must be on the disk above
+      - key: TZ_OFFSET_MINUTES
+        value: "345"
+      - key: PLAYER_LOOKUP_URL
+        sync: false
+      - key: PLAYER_LOOKUP_REGION
+        value: BD
+      - key: PLAYER_LOOKUP_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: NTFY_URL
+        sync: false
+      - key: NOTIFY_UNPAID
+        value: "false"

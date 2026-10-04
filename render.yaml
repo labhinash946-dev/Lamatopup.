@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: lama-topup-backend
+    env: python
+    plan: free   # Free plan: no disk, local files are wiped on restart. See README "Free plan".
+                 # For persistent storage use render.paid.yaml instead (Starter + disk).
+    buildCommand: pip install -r requirements.txt
+    # One worker: SQLite + in-memory rate limits. Threads handle concurrency.
+    startCommand: gunicorn app:app --workers 1 --threads 4 --timeout 90
+    healthCheckPath: /api/health
+    envVars:
+      - key: ADMIN_TOKEN
+        generateValue: true
+      - key: DATABASE_PATH
+        value: data/lama.sqlite3   # temporary on the free plan: Telegram backups restore it on wake-up
+      - key: TZ_OFFSET_MINUTES
+        value: "345"
+      - key: PLAYER_LOOKUP_URL
+        sync: false
+      - key: PLAYER_LOOKUP_REGION
+        value: BD
+      - key: PLAYER_LOOKUP_API_KEY
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: NTFY_URL
+        sync: false
+      - key: NOTIFY_UNPAID
+        value: "false"
