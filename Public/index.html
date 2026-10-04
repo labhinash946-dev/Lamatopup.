@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lama Topup • Free Fire & eFootball</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">⚡</span><span>LAMA<span>TOPUP</span></span></div>
+    <nav>
+      <a href="#home">Home</a><a href="#games">Games</a><a href="#how">How it works</a>
+    </nav>
+    <button class="outline" onclick="location.href='/track'">Track Order</button>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">FAST • SAFE • NEPAL</p>
+        <h1>Top up your game.<br><span>Play without limits.</span></h1>
+        <p class="hero-copy">Instant checkout for Free Fire diamonds and eFootball coins/packs. Prices are shown in Nepali Rupees.</p>
+        <div class="hero-actions"><button id="heroFreefireBtn" class="primary" onclick="chooseGame('freefire')">Top up Free Fire</button><button id="heroEfootballBtn" class="secondary" onclick="chooseGame('efootball')">eFootball top up</button></div>
+      </div>
+      <div class="hero-card">
+        <div class="glow"></div><div class="football">⚽</div><div class="diamond">💎</div>
+        <p>ONE STORE</p><h3>Two games.<br>One payment flow.</h3>
+      </div>
+    </section>
+
+    <section class="section" id="games">
+      <div class="section-heading"><div><p class="eyebrow">SELECT YOUR GAME</p><h2>Trending games</h2></div><span class="pill">NPR / Rs.</span></div>
+      <div class="game-grid">
+        <button class="game-card ff" onclick="chooseGame('freefire')"><div class="game-art"><img src="assets/free-fire-logo.png" alt="Free Fire" class="game-logo"></div><div><h3>Free Fire</h3><p>Diamonds & memberships</p></div><span>Open →</span></button>
+        <button class="game-card ef" onclick="chooseGame('efootball')"><div class="game-art"><img src="assets/efootball-logo.png" alt="eFootball" class="game-logo"></div><div><h3>eFootball</h3><p>Coins & special packs</p></div><span>Open →</span></button>
+      </div>
+    </section>
+
+    <section class="section checkout" id="orders">
+      <div class="game-hero">
+        <div class="gh-bg" id="ghBg"></div>
+        <div class="gh-content">
+          <div id="selectedIcon" class="gh-icon"><img src="assets/free-fire-logo.png" alt="" class="mini-logo"></div>
+          <h2 id="selectedTitle" class="gh-title">Free Fire Diamond Top Up Nepal</h2>
+          <div class="chips"><span class="chip">⚡ Fast Delivery</span><span class="chip">🛡️ Safe &amp; Secure</span><span class="chip">🇳🇵 NPR Prices</span></div>
+          <button type="button" class="about-box" id="aboutBox" onclick="this.classList.toggle('open')"><small>ⓘ About This Game</small><p id="aboutText"></p></button>
+          <div class="why-box"><b>🛡️ Why Lama Topup?</b><ul><li>No login or password needed</li><li>Prices in Nepali Rupees (NPR)</li><li>Pay securely with Fonepay QR</li></ul></div>
+        </div>
+      </div>
+
+      <div class="checkout-grid">
+        <div class="steps-col">
+          <div class="login-banner"><div class="lb-ico">⚡</div><div><b id="bannerTitle">Top Up Free Fire Without Login</b><p id="bannerText"></p></div></div>
+
+          <div class="step-card">
+            <div class="step-head"><span class="step-num">1</span><h3 id="step1Title">Enter Your Game ID</h3></div>
+            <div id="efootballDetails" class="account-details hidden">
+              <label><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>KONAMI User ID / Player ID</label>
+              <input id="konamiId" placeholder="Enter your KONAMI User ID" autocomplete="off" />
+              <p class="field-note">Never share your KONAMI password. We do not collect passwords.</p>
+              <label>WhatsApp Number</label>
+              <input id="whatsapp" type="tel" placeholder="98XXXXXXXX" />
+              <label>Device</label>
+              <select id="device" class="select-field"><option>Android</option><option>iOS</option><option>Steam / PC</option></select>
+            </div>
+            <div id="freefireDetails">
+              <label><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>User ID / Player ID</label><div class="glow-field"><input id="playerId" placeholder="Enter your game user ID" inputmode="numeric" oninput="clearPlayerName()" /></div><div class="verify-row"><div id="playerCard" class="player-status"></div></div><p class="field-note">Find your UID: open Free Fire, tap your profile picture (top-left), and your UID is shown under your name.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-head"><span class="step-num">2</span><h3 id="step2Title">Select Diamonds Package</h3></div>
+            <div class="search"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="pkgSearch" type="search" placeholder="Search packages by name or price..." autocomplete="off" oninput="pkgFilter=this.value;render()" /></div>
+            <div id="packages" class="packages"></div>
+            <p id="pkgEmpty" class="field-note hidden">No packages match your search.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-head"><span class="step-num">3</span><h3>Choose Payment Method</h3></div>
+            <div class="payments">
+              <button class="payment active" data-payment="esewa">🔴 <span>eSewa / Khalti (via Fonepay QR)</span><b>●</b></button>
+              <button class="payment" data-payment="wallet">🔵 <span>Mobile banking / bank app (via Fonepay QR)</span><b>○</b></button>
+            </div>
+            <button class="primary wide" onclick="showPayment()">Continue to payment →</button>
+            <p class="fine">Your order is processed after payment is confirmed.</p>
+          </div>
+        </div>
+        <aside class="panel summary"><h3>Order summary</h3><div class="summary-row"><span>Game</span><b id="sumGame">Free Fire</b></div><div class="summary-row"><span>Package</span><b id="sumPackage">25 Diamonds</b></div><div class="summary-row"><span>Payment fee</span><b>Rs. 0</b></div><hr><div class="total"><span>Total</span><strong id="sumTotal">Rs. 30</strong></div><div class="secure">🔒 Secure checkout<br><small>Pay with Fonepay QR.</small></div></aside>
+      </div>
+    </section>
+
+    <section class="section" id="how"><div class="section-heading"><div><p class="eyebrow">SIMPLE PROCESS</p><h2>How it works</h2></div></div>
+      <div class="steps"><div><b>01</b><h3>Enter UID</h3><p>Provide your Free Fire or eFootball player ID.</p></div><div><b>02</b><h3>Select package</h3><p>Choose the coins, diamonds, or pack you want.</p></div><div><b>03</b><h3>Pay & confirm</h3><p>Use the same Nepali payment flow and save your receipt.</p></div></div>
+    </section>
+  </main>
+
+  <div id="paymentModal" class="modal hidden"><div class="modal-box"><button class="close" onclick="closePayment()">×</button><p class="eyebrow">PAYMENT</p><h2>Scan & pay</h2><p id="modalText"></p><div class="uid-check">Your ID: <b id="modalUid"></b><span id="modalName" class="player-name"></span><small>Please double-check your ID before paying.</small></div><div class="qr"><img src="assets/fonepay-qr.jpg" alt="Fonepay QR - Avinash Bal"></div><div class="bank-box"><b>Payment method:</b> <span id="modalMethod">eSewa / Khalti (via Fonepay QR)</span><br><b>Amount:</b> <span id="modalAmount">Rs. 30</span></div><input placeholder="Payment transaction ID (from your receipt)" id="remarks" maxlength="60"/><button class="primary wide" onclick="submitOrder()">Submit order</button><p class="fine">Orders are processed once payment is verified.</p></div></div>
+  <div class="bottom-nav">
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 12 3l9 8v10h-6v-6H9v6H3z"/></svg>Home</button>
+    <button onclick="scrollToSection('games')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>Games</button>
+    <button class="fab" onclick="scrollToSection('orders')" aria-label="Top up now">🎮</button>
+    <button onclick="scrollToSection('how')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.5"/></svg>How</button>
+    <button onclick="showPayment()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/></svg>Pay</button>
+  </div>
+  <footer>© 2026 Lama Topup • Free Fire & eFootball store</footer>
+  <script src="script.js"></script>
+</body>
+</html>
