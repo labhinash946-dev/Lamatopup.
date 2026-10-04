@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Lama Admin</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f5fa;--card:#fff;--tx:#14161f;--mut:#6b7080;--bd:#e2e4ee;--ac:#6d4aff;--ok:#12a150;--warn:#c27a00;--bad:#d93a3a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1117;--card:#181b25;--tx:#eceef6;--mut:#8b90a3;--bd:#272b3a;--ac:#8f74ff;--ok:#3ccf7c;--warn:#f0b13a;--bad:#ff6b6b}}
+:root[data-theme="dark"]{--bg:#0f1117;--card:#181b25;--tx:#eceef6;--mut:#8b90a3;--bd:#272b3a;--ac:#8f74ff;--ok:#3ccf7c;--warn:#f0b13a;--bad:#ff6b6b}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:12px}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+h1{font-size:18px;margin:0}h2{font-size:15px;margin:0 0 8px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:10px}
+input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--bd);background:var(--bg);color:var(--tx);font:inherit}
+button{font:inherit;cursor:pointer}
+.btn{padding:9px 13px;border:0;border-radius:10px;background:var(--ac);color:#fff;font-weight:700}
+.btn.g{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}
+.btn.full{width:100%;margin-top:10px;padding:12px}
+.btn:disabled{opacity:.5}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:6px;-webkit-overflow-scrolling:touch}
+.tabs button{flex:none;padding:8px 12px;border-radius:99px;border:1px solid var(--bd);background:var(--card);color:var(--tx);font-size:13px;font-weight:600}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.badge{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:9px;background:var(--bad);color:#fff;font-size:11px;text-align:center}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:700;border:1px solid currentColor;white-space:nowrap}
+.awaiting_payment,.payment_submitted{color:var(--warn)}.processing{color:var(--ac)}.completed{color:var(--ok)}.rejected,.cancelled{color:var(--bad)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mut{color:var(--mut);font-size:12px}.mono{font:12px ui-monospace,Menlo,monospace;word-break:break-all}
+.ord{cursor:pointer}.det{margin-top:10px;border-top:1px solid var(--bd);padding-top:10px}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:3px 8px;font-size:13px}.kv span:nth-child(odd){color:var(--mut)}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.ev{font-size:12px;color:var(--mut);margin-top:8px}.ev div{padding:2px 0}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:var(--bg);border-radius:10px;padding:8px}.stat b{font-size:19px;display:block}
+.err{color:var(--bad);font-size:13px;margin-top:8px}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:616px;margin:0 auto;background:var(--tx);color:var(--bg);padding:11px 14px;border-radius:10px;font-size:14px;z-index:9}
+.hide{display:none}
+</style></head><body><div class="wrap">
+
+<div id="login" class="card hide">
+  <h1>Lama Admin</h1><p class="mut">Enter your admin token.</p>
+  <input id="tok" type="password" placeholder="ADMIN_TOKEN" autocomplete="current-password">
+  <label class="mut" style="display:block;margin-top:8px"><input id="rem" type="checkbox" style="width:auto"> Stay signed in on this device</label>
+  <button class="btn full" id="in">Sign in</button><div id="lerr" class="err"></div>
+</div>
+
+<div id="app" class="hide">
+  <header><h1>Lama Admin</h1><div><button class="btn g" id="rf">Refresh</button> <button class="btn g" id="out">Sign out</button></div></header>
+  <div id="warn" class="card hide" style="border-color:var(--bad)"><b style="color:var(--bad)">Orders are on temporary storage</b>
+   <div class="mut" style="margin-top:4px">They will be lost when the server restarts or redeploys. Add a persistent disk (see README) or download backups often.</div></div>
+  <div class="tabs" id="tabs"></div>
+  <input id="q" placeholder="Search order ID, player UID or transaction ID" style="margin-bottom:10px">
+  <div id="list"></div>
+  <button class="btn g full hide" id="more">Load more</button>
+
+  <div class="card" style="margin-top:14px"><h2>This week</h2>
+    <div class="stats"><div class="stat"><span class="mut">Delivered</span><b id="rc">-</b></div>
+    <div class="stat"><span class="mut">Revenue</span><b id="rr">-</b></div>
+    <div class="stat"><span class="mut">Open now</span><b id="ro">-</b></div></div>
+    <div id="rp" class="mut" style="margin-top:8px"></div></div>
+  <div class="card"><h2>Memberships ending in 2 days</h2><div id="ex" class="mut">Loading...</div></div>
+  <div class="card"><h2>Alerts</h2><div class="mut">Get a phone alert when a customer pays.</div><button class="btn g full" id="ta">Send test alert</button></div>
+  <div class="card"><h2>Storage and backups</h2><div id="st" class="mut">Loading...</div>
+   <button class="btn g full" id="bn">Back up to Telegram now</button>
+   <button class="btn g full" id="bk">Download backup</button>
+   <button class="btn g full" id="cv">Export orders (CSV)</button>
+   <label class="btn g full" style="display:block;text-align:center">Restore from backup<input type="file" id="rs" accept=".sqlite3,.db" hidden></label></div>
+</div>
+<div id="toast" class="toast hide"></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store=()=>localStorage.getItem("lamaAdmin")?localStorage:sessionStorage;
+let token=null;try{token=localStorage.getItem("lamaAdmin")||sessionStorage.getItem("lamaAdmin")}catch(e){}
+const TABS=[["payment_submitted","To verify"],["processing","To deliver"],["awaiting_payment","Awaiting pay"],["completed","Done"],["","All"]];
+let tab="payment_submitted",offset=0,open=null,counts={},timer=null;const LIM=30;
+
+async function api(path,opt={}){
+  const r=await fetch("/api/admin"+path,{method:opt.method||"GET",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:opt.body?JSON.stringify(opt.body):undefined});
+  let j={};try{j=await r.json()}catch(e){}
+  if(r.status===401){signOut();throw new Error("Session expired")}
+  if(!r.ok||j.success===false)throw new Error(j.error||("Error "+r.status));
+  return j}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.remove("hide");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.add("hide"),3200)}
+function ago(iso){const s=(Date.now()-new Date(iso))/1000;if(s<60)return"just now";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"}
+const loc=iso=>iso?new Date(iso).toLocaleString([], {dateStyle:"medium",timeStyle:"short"}):"-";
+const pill=s=>`<span class="pill ${esc(s)}">${esc(s.replace("_"," "))}</span>`;
+
+function showLogin(msg){$("#app").classList.add("hide");$("#login").classList.remove("hide");$("#lerr").textContent=msg||""}
+function signOut(){token=null;localStorage.removeItem("lamaAdmin");sessionStorage.removeItem("lamaAdmin");clearInterval(timer);showLogin()}
+$("#out").onclick=signOut;
+$("#in").onclick=async()=>{const t=$("#tok").value.trim();if(!t)return;token=t;
+  try{await api("/orders?limit=1");(($("#rem").checked)?localStorage:sessionStorage).setItem("lamaAdmin",t);start()}
+  catch(e){token=null;showLogin(e.message==="Invalid admin token"?"Wrong token":e.message)}};
+
+function start(){$("#login").classList.add("hide");$("#app").classList.remove("hide");drawTabs();load(true);reports();loadStorage();
+  clearInterval(timer);timer=setInterval(()=>{if(!document.hidden){load(true);counts_()}},30000)}
+
+async function counts_(){try{const j=await api("/reports/weekly");const o=j.open_now||{};
+  const c={payment_submitted:o.payment_submitted||0,processing:o.processing||0,awaiting_payment:o.awaiting_payment||0};
+  counts=c;drawTabs();document.title=(c.payment_submitted?`(${c.payment_submitted}) `:"")+"Lama Admin"}catch(e){}}
+function drawTabs(){$("#tabs").innerHTML=TABS.map(([k,l])=>`<button data-k="${k}" class="${k===tab?"on":""}">${l}${counts[k]?`<span class="badge">${counts[k]}</span>`:""}</button>`).join("");
+  document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>{tab=b.dataset.k;open=null;drawTabs();load(true)})}
+
+let qt;$("#q").oninput=()=>{clearTimeout(qt);qt=setTimeout(()=>load(true),350)};
+$("#rf").onclick=()=>{load(true);reports()};
+$("#more").onclick=()=>load(false);
+$("#ta").onclick=async e=>{e.target.disabled=true;try{await api("/notify-test",{method:"POST",body:{}});toast("Test alert sent. Check your phone.")}catch(x){toast(x.message)}e.target.disabled=false};
+
+async function load(reset){
+  if(reset)offset=0;
+  try{const j=await api(`/orders?status=${encodeURIComponent(tab)}&q=${encodeURIComponent($("#q").value.trim())}&limit=${LIM}&offset=${offset}`);
+    const html=j.items.map(card).join("")||(reset?'<div class="card mut">No orders here.</div>':"");
+    if(reset)$("#list").innerHTML=html;else $("#list").insertAdjacentHTML("beforeend",html);
+    offset+=j.items.length;$("#more").classList.toggle("hide",offset>=j.total);
+    if(reset){counts_();if(open)expand(open,true)}}
+  catch(e){if(reset)$("#list").innerHTML=`<div class="card err">${esc(e.message)}</div>`}}
+
+function card(o){return `<div class="card ord" id="o-${esc(o.id)}" onclick="expand('${esc(o.id)}')">
+ <div class="row"><b>${esc(o.product_name)} <span class="mut">Rs. ${esc(o.amount)}</span></b>${pill(o.status)}</div>
+ <div class="mut">${esc(o.game==="freefire"?"Free Fire":"eFootball")} ID <b>${esc(o.user_id)}</b> · ${ago(o.created_at)}${o.payment_ref?` · ref ${esc(o.payment_ref)}`:""}</div>
+ <div class="det hide" id="d-${esc(o.id)}"></div></div>`}
+
+async function expand(id,keep){
+  const d=document.getElementById("d-"+id);if(!d)return;
+  if(!keep&&!d.classList.contains("hide")){d.classList.add("hide");open=null;return}
+  document.querySelectorAll(".det").forEach(x=>{if(x!==d)x.classList.add("hide")});
+  open=id;d.classList.remove("hide");if(!keep)d.innerHTML='<span class="mut">Loading...</span>';
+  try{const o=(await api("/orders/"+encodeURIComponent(id))).order;d.onclick=e=>e.stopPropagation();
+    const a=[];const s=o.status,P=s==="awaiting_payment"||s==="payment_submitted";
+    if(P)a.push(btn(id,"verify-payment","Payment received","ok"),btn(id,"reject","Reject","bad","reason"));
+    if(s==="processing")a.push(btn(id,"complete","Mark delivered","ok","note"));
+    if(P||s==="processing")a.push(btn(id,"cancel","Cancel / refund","g","reason"));
+    d.innerHTML=`<div class="kv">
+     <span>Order</span><span class="mono">${esc(o.id)}</span><span>Player ID</span><span><b>${esc(o.user_id)}</b> <button class="btn g" style="padding:2px 8px;font-size:12px" onclick="copy('${esc(o.user_id)}')">Copy</button></span>
+     ${o.server_id?`<span>Server</span><span>${esc(o.server_id)}</span>`:""}${o.contact?`<span>Contact</span><span><a href="tel:${esc(o.contact)}">${esc(o.contact)}</a></span>`:""}
+     <span>Amount</span><span>Rs. ${esc(o.amount)}</span><span>Txn ref</span><span>${esc(o.payment_ref||"-")}</span>
+     ${o.remarks?`<span>Remarks</span><span>${esc(o.remarks)}</span>`:""}${o.failure_reason?`<span>Reason</span><span>${esc(o.failure_reason)}</span>`:""}
+     <span>Created</span><span>${loc(o.created_at)}</span>${o.completed_at?`<span>Delivered</span><span>${loc(o.completed_at)}</span>`:""}
+     ${o.membership_expires_at?`<span>Ends</span><span>${loc(o.membership_expires_at)}</span>`:""}</div>
+     <div class="acts">${a.join("")}</div>
+     <div class="ev">${o.events.map(e=>`<div>${loc(e.at)} · ${esc(e.actor)} · ${esc(e.event)}${e.detail?`: ${esc(e.detail)}`:""}</div>`).join("")}</div>`}
+  catch(e){d.innerHTML=`<span class="err">${esc(e.message)}</span>`}}
+const btn=(id,act,label,cls,ask)=>`<button class="btn ${cls}" onclick="act('${esc(id)}','${act}',${ask?`'${ask}'`:"null"},this)">${label}</button>`;
+async function act(id,a,ask,el){
+  let body;if(ask){const v=prompt(ask==="note"?"Delivery note (optional)":"Reason (optional)");if(v===null)return;body={[ask]:v}}
+  else if(a==="verify-payment"&&!confirm("Confirm the money is in your Fonepay/eSewa account?"))return;
+  el.disabled=true;
+  try{await api(`/orders/${encodeURIComponent(id)}/${a}`,{method:"POST",body:body||{}});toast("Done");await load(true);reports()}
+  catch(e){toast(e.message);el.disabled=false}}
+function copy(t){navigator.clipboard?.writeText(t).then(()=>toast("Copied "+t),()=>toast("Copy failed"))}
+
+async function reports(){
+  try{const j=await api("/reports/weekly?days=7");$("#rc").textContent=j.completed_orders;$("#rr").textContent="Rs. "+j.revenue_npr;
+    $("#ro").textContent=Object.values(j.open_now||{}).reduce((a,b)=>a+b,0);
+    $("#rp").innerHTML=j.per_product.map(p=>`${esc(p.product_name)}: ${p.orders} · Rs. ${p.revenue}`).join("<br>")||"No deliveries in the last 7 days."}catch(e){}
+  try{const j=await api("/memberships/expiring?days=2");
+    $("#ex").innerHTML=j.items.length?j.items.map(m=>`<div class="row" style="padding:4px 0"><span>${esc(m.product_name)} · ID <b>${esc(m.user_id)}</b></span><span class="mut">${loc(m.membership_expires_at)}</span></div>`).join(""):"None. Customers whose weekly or monthly pack is about to end will show here."}catch(e){}}
+
+
+async function loadStorage(){try{const j=await api("/storage");$("#warn").classList.toggle("hide",j.persistent);
+  $("#st").innerHTML=`${j.orders} orders · ${(j.db_bytes/1024).toFixed(0)} KB · storage: <b>${j.persistent?"persistent":"temporary"}</b><br>Telegram backups: ${j.telegram_backup?(j.last_backup_at?"last sent "+esc(loc(j.last_backup_at)):"on, none sent yet"):"off (set up Telegram alerts to enable)"}<br>Auto-restore after a wipe: <b>${j.auto_restore_ready?"ready":(j.persistent?"not needed (persistent disk)":"not confirmed yet, tap Back up to Telegram now")}</b>`}catch(e){}}
+async function dl(path,name){try{const r=await fetch("/api/admin"+path,{headers:{Authorization:"Bearer "+token}});if(!r.ok){toast("Download failed");return}
+  const b=await r.blob(),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}catch(e){toast("Download failed")}}
+$("#bn").onclick=async e=>{e.target.disabled=true;try{const j=await api("/backup-now",{method:"POST",body:{}});toast(j.pinned?"Backup sent and pinned. Auto-restore is ready.":"Backup sent, but pinning failed. Use a private chat with your bot.");loadStorage()}catch(x){toast(x.message)}e.target.disabled=false};
+$("#bk").onclick=()=>dl("/backup","lama-backup-"+new Date().toISOString().slice(0,10)+".sqlite3");
+$("#cv").onclick=()=>dl("/export.csv","lama-orders-"+new Date().toISOString().slice(0,10)+".csv");
+async function doRestore(f,force){const fd=new FormData();fd.append("file",f);
+  try{const r=await fetch("/api/admin/restore"+(force?"?force=1":""),{method:"POST",headers:{Authorization:"Bearer "+token},body:fd});const j=await r.json().catch(()=>({}));
+   if(r.status===409&&j.code==="not_empty"){if(confirm(j.error+" Replace them with this backup?"))return doRestore(f,true);return}
+   if(!r.ok){toast(j.error||"Restore failed");return}toast("Restored "+j.orders+" orders");load(true);reports();loadStorage()}catch(e){toast("Restore failed")}}
+$("#rs").onchange=e=>{const f=e.target.files[0];e.target.value="";if(f)doRestore(f,false)};
+token?start():showLogin();
+</script></body></html>
